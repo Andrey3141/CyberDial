@@ -60,6 +60,7 @@ class UpdateChecker(private val context: Context, private val onResult: (Boolean
                 if (responseCode == HttpURLConnection.HTTP_OK) {
                     val inputStream = connection.inputStream
                     val json = inputStream.bufferedReader().use { it.readText() }
+                    Log.d("UpdateChecker", "JSON ответ: ${json.take(200)}")
                     Gson().fromJson(json, GitHubRelease::class.java)
                 } else {
                     Log.e("UpdateChecker", "GitHub API вернул код: $responseCode")
@@ -73,13 +74,18 @@ class UpdateChecker(private val context: Context, private val onResult: (Boolean
 
         override fun onPostExecute(release: GitHubRelease?) {
             if (release == null) {
+                Log.d("UpdateChecker", "Релиз не найден")
                 onResult(false, null, null, null, null)
                 return
             }
 
             val currentVersion = getCurrentVersion()
-            val latestVersion = release.tag_name.replace("v", "")
+            // Удаляем букву v из tag_name если она есть
+            val latestVersion = release.tag_name.replace(Regex("^v"), "")
+            Log.d("UpdateChecker", "currentVersion = $currentVersion, latestVersion = $latestVersion")
+
             val isUpdateAvailable = compareVersions(currentVersion, latestVersion) < 0
+            Log.d("UpdateChecker", "isUpdateAvailable = $isUpdateAvailable")
 
             val apkUrl = release.assets?.find { it.name.endsWith(".apk") }?.browser_download_url
             val changelog = release.body
