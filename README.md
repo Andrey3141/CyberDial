@@ -1,6 +1,6 @@
 <div align="center">
   
-# 📱 CyberDial v1.2.0
+# 📱 CyberDial v1.3.0
 
 ![Android](https://img.shields.io/badge/Android-14+-3DDC84?logo=android&logoColor=white)
 ![Kotlin](https://img.shields.io/badge/Kotlin-1.9+-7F52FF?logo=kotlin&logoColor=white)
@@ -299,7 +299,7 @@ cd CyberDial
 
 ---
 
-**CyberDial v1.2.0** — симулятор телефона с Telegram и живыми диалогами! 📱✨
+CyberDial — симулятор телефона с Telegram и живыми диалогами! 📱✨
 
 *Сделано с ❤️ для Android-энтузиастов*
 
