@@ -33,6 +33,15 @@ class MainActivity : AppCompatActivity() {
     private lateinit var messageRepository: MessageRepository
     private lateinit var homeScreenAdapter: HomeScreenPagerAdapter
     private var unreadUpdateRunnable: Runnable? = null
+    private lateinit var mamulyaTimerManager: MamulyaTimerManager
+
+    // Состояния активности для дока
+    private val dockItemsState = mapOf(
+        R.id.dockPhone to false,      // Телефон неактивен
+        R.id.dockMessages to true,    // Сообщения (Telegram) активен
+        R.id.dockBrowser to false,    // Браузер неактивен
+        R.id.dockCamera to false      // Камера неактивна
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,6 +49,22 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         messageRepository = MessageRepository(this)
+
+        // Инициализируем глобальный таймер Мамули
+        mamulyaTimerManager = MamulyaTimerManager.getInstance(this)
+
+        // Запускаем глобальный таймер при старте приложения, если он еще не запущен
+        if (!mamulyaTimerManager.isTimerStarted() && !mamulyaTimerManager.isTimerFinished()) {
+            mamulyaTimerManager.startGlobalTimer(60)
+        }
+
+        // Слушаем завершение таймера
+        mamulyaTimerManager.setOnTimerFinishListener {
+            // Таймер завершен - показываем уведомление
+            runOnUiThread {
+                Toast.makeText(this, "🔔 Мамуля сейчас напишет! Открой Telegram", Toast.LENGTH_LONG).show()
+            }
+        }
 
         window.decorView.systemUiVisibility = (
                 View.SYSTEM_UI_FLAG_FULLSCREEN or
@@ -156,6 +181,7 @@ class MainActivity : AppCompatActivity() {
         handler.removeCallbacks(timeRunnable)
         handler.removeCallbacks(batteryRunnable)
         unreadUpdateRunnable?.let { handler.removeCallbacks(it) }
+        // Не останавливаем таймер Мамули при уничтожении активности
     }
 
     private fun setupWindowInsets() {
@@ -216,14 +242,34 @@ class MainActivity : AppCompatActivity() {
         val dockBrowser = findViewById<ImageView>(R.id.dockBrowser)
         val dockCamera = findViewById<ImageView>(R.id.dockCamera)
 
-        val dockItems = listOf(dockPhone, dockMessages, dockBrowser, dockCamera)
+        val dockItems = mapOf(
+            dockPhone to R.id.dockPhone,
+            dockMessages to R.id.dockMessages,
+            dockBrowser to R.id.dockBrowser,
+            dockCamera to R.id.dockCamera
+        )
 
-        dockItems.forEach { item ->
-            item.setOnClickListener {
+        // Применяем визуальное состояние для каждой иконки дока
+        dockItems.forEach { (imageView, id) ->
+            val isActive = dockItemsState[id] ?: false
+            applyDockIconState(imageView, isActive)
+        }
+
+        dockItems.forEach { (imageView, id) ->
+            imageView.setOnClickListener {
+                val isActive = dockItemsState[id] ?: false
+
                 it.animate().scaleX(0.9f).scaleY(0.9f).setDuration(100).withEndAction {
                     it.animate().scaleX(1f).scaleY(1f).setDuration(100).start()
                 }
-                when (it.id) {
+
+                // Если иконка неактивна - показываем сообщение и не открываем
+                if (!isActive) {
+                    Toast.makeText(this, "📴 Функция недоступна", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
+
+                when (id) {
                     R.id.dockPhone -> showToast("Телефон")
                     R.id.dockMessages -> {
                         val intent = Intent(this, TelegramSplashActivity::class.java)
@@ -233,6 +279,17 @@ class MainActivity : AppCompatActivity() {
                     R.id.dockCamera -> showToast("Камера")
                 }
             }
+        }
+    }
+
+    private fun applyDockIconState(imageView: ImageView, isActive: Boolean) {
+        if (!isActive) {
+            // Затемнение для неактивных иконок дока
+            imageView.alpha = 0.5f
+            imageView.setColorFilter(0x66FFFFFF)
+        } else {
+            imageView.alpha = 1f
+            imageView.colorFilter = null
         }
     }
 

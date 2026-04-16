@@ -25,6 +25,7 @@ CyberDial/
 │           │               ├── HomeScreenFragment.kt
 │           │               ├── HomeScreenPagerAdapter.kt
 │           │               ├── MainActivity.kt
+│           │               ├── MamulyaTimerManager.kt
 │           │               ├── MessageRepository.kt
 │           │               ├── TelegramActivity.kt
 │           │               ├── TelegramSplashActivity.kt
@@ -49,6 +50,7 @@ CyberDial/
 │               │   ├── honor_wallpaper.xml
 │               │   ├── ic_check_double.xml
 │               │   ├── ic_check_single.xml
+│               │   ├── ic_instagram.xml
 │               │   ├── ic_launcher_background.xml
 │               │   ├── ic_launcher_foreground.xml
 │               │   ├── ic_message.xml
@@ -56,6 +58,7 @@ CyberDial/
 │               │   ├── ic_send.xml
 │               │   ├── ic_telegram_color.xml
 │               │   ├── ic_weather_sunny.xml
+│               │   ├── mamulya_gradient_bg.xml
 │               │   ├── page_indicator_active.xml
 │               │   ├── page_indicator_inactive.xml
 │               │   ├── stat_sys_battery_0.xml
@@ -66,7 +69,8 @@ CyberDial/
 │               │   ├── stat_sys_battery_charging.xml
 │               │   ├── stat_sys_signal.xml
 │               │   ├── unread_badge.xml
-│               │   └── values-v31/
+│               │   ├── values-v31/
+│               │   └── widget_glass_bg.xml
 │               ├── layout/
 │               │   ├── activity_chat.xml
 │               │   ├── activity_main.xml

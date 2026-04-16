@@ -1,266 +1,172 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="4dp"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="8dp"
     android:clickable="true"
-    android:focusable="true">
+    android:focusable="true"
+    android:foreground="?android:attr/selectableItemBackgroundBorderless">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:gravity="center"
-        android:padding="8dp"
-        android:clickable="false"
-        android:focusable="false">
+    <FrameLayout
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_marginBottom="6dp">
 
+        <!-- Обычная иконка (без фоновой карточки!) -->
+        <ImageView
+            android:id="@+id/appIcon"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="fitCenter" />
+
+        <!-- Неактивный оверлей (только если приложение выключено) -->
+        <View
+            android:id="@+id/inactiveOverlay"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#CC000000"
+            android:visibility="gone" />
+
+        <!-- Иконка замка для неактивных приложений -->
+        <ImageView
+            android:id="@+id/lockIcon"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="4dp"
+            android:src="@android:drawable/ic_lock_lock"
+            android:visibility="gone" />
+
+        <!-- Бейдж уведомлений (только для Telegram) -->
         <FrameLayout
-            android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:layout_marginBottom="4dp"
-            android:clickable="false"
-            android:focusable="false"
-            android:layout_gravity="center">
+            android:id="@+id/badgeContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|end"
+            android:layout_marginTop="2dp"
+            android:layout_marginEnd="2dp"
+            android:visibility="gone">
 
-            <androidx.cardview.widget.CardView
-                android:id="@+id/appIconContainer"
-                android:layout_width="56dp"
-                android:layout_height="56dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="4dp"
-                android:backgroundTint="#3D5A80"
-                android:clickable="false"
-                android:focusable="false" />
-
-            <GridLayout
-                android:id="@+id/miniGridContainer"
-                android:layout_width="56dp"
-                android:layout_height="56dp"
-                android:layout_gravity="center"
-                android:columnCount="3"
-                android:rowCount="3"
-                android:useDefaultMargins="false"
-                android:visibility="gone"
-                android:clickable="false"
-                android:focusable="false"
-                android:background="@drawable/folder_background">
-
-                <FrameLayout
-                    android:id="@+id/miniSlot1"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:layout_columnWeight="1"
-                    android:layout_rowWeight="1"
-                    android:layout_margin="2dp">
-
-                    <ImageView
-                        android:id="@+id/miniIcon1"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:scaleType="centerCrop"
-                        android:padding="2dp"
-                        android:visibility="gone" />
-                </FrameLayout>
-
-                <FrameLayout
-                    android:id="@+id/miniSlot2"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:layout_columnWeight="1"
-                    android:layout_rowWeight="1"
-                    android:layout_margin="2dp">
-
-                    <ImageView
-                        android:id="@+id/miniIcon2"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:scaleType="centerCrop"
-                        android:padding="2dp"
-                        android:visibility="gone" />
-                </FrameLayout>
-
-                <FrameLayout
-                    android:id="@+id/miniSlot3"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:layout_columnWeight="1"
-                    android:layout_rowWeight="1"
-                    android:layout_margin="2dp">
-
-                    <ImageView
-                        android:id="@+id/miniIcon3"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:scaleType="centerCrop"
-                        android:padding="2dp"
-                        android:visibility="gone" />
-                </FrameLayout>
-
-                <FrameLayout
-                    android:id="@+id/miniSlot4"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:layout_columnWeight="1"
-                    android:layout_rowWeight="1"
-                    android:layout_margin="2dp">
-
-                    <ImageView
-                        android:id="@+id/miniIcon4"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:scaleType="centerCrop"
-                        android:padding="2dp"
-                        android:visibility="gone" />
-                </FrameLayout>
-
-                <FrameLayout
-                    android:id="@+id/miniSlot5"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:layout_columnWeight="1"
-                    android:layout_rowWeight="1"
-                    android:layout_margin="2dp">
-
-                    <ImageView
-                        android:id="@+id/miniIcon5"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:scaleType="centerCrop"
-                        android:padding="2dp"
-                        android:visibility="gone" />
-                </FrameLayout>
-
-                <FrameLayout
-                    android:id="@+id/miniSlot6"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:layout_columnWeight="1"
-                    android:layout_rowWeight="1"
-                    android:layout_margin="2dp">
-
-                    <ImageView
-                        android:id="@+id/miniIcon6"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:scaleType="centerCrop"
-                        android:padding="2dp"
-                        android:visibility="gone" />
-                </FrameLayout>
-
-                <FrameLayout
-                    android:id="@+id/miniSlot7"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:layout_columnWeight="1"
-                    android:layout_rowWeight="1"
-                    android:layout_margin="2dp">
-
-                    <ImageView
-                        android:id="@+id/miniIcon7"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:scaleType="centerCrop"
-                        android:padding="2dp"
-                        android:visibility="gone" />
-                </FrameLayout>
-
-                <FrameLayout
-                    android:id="@+id/miniSlot8"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:layout_columnWeight="1"
-                    android:layout_rowWeight="1"
-                    android:layout_margin="2dp">
-
-                    <ImageView
-                        android:id="@+id/miniIcon8"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:scaleType="centerCrop"
-                        android:padding="2dp"
-                        android:visibility="gone" />
-                </FrameLayout>
-
-                <FrameLayout
-                    android:id="@+id/miniSlot9"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:layout_columnWeight="1"
-                    android:layout_rowWeight="1"
-                    android:layout_margin="2dp">
-
-                    <ImageView
-                        android:id="@+id/miniIcon9"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:scaleType="centerCrop"
-                        android:padding="2dp"
-                        android:visibility="gone" />
-                </FrameLayout>
-
-            </GridLayout>
-
-            <androidx.cardview.widget.CardView
-                android:id="@+id/normalIconContainer"
-                android:layout_width="56dp"
-                android:layout_height="56dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="4dp"
-                android:backgroundTint="#4DFFFFFF"
-                android:visibility="gone"
-                android:clickable="false"
-                android:focusable="false">
-
-                <ImageView
-                    android:id="@+id/appIcon"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:padding="12dp"
-                    android:clickable="false"
-                    android:focusable="false" />
-
-            </androidx.cardview.widget.CardView>
-
-            <FrameLayout
-                android:id="@+id/badgeContainer"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="top|end"
-                android:layout_marginTop="2dp"
-                android:layout_marginEnd="2dp"
-                android:visibility="gone"
-                android:clickable="false"
-                android:focusable="false">
-
-                <TextView
-                    android:id="@+id/badgeText"
-                    android:layout_width="18dp"
-                    android:layout_height="18dp"
-                    android:background="@drawable/unread_badge"
-                    android:gravity="center"
-                    android:textColor="#FFFFFF"
-                    android:textSize="10sp"
-                    android:clickable="false"
-                    android:focusable="false" />
-
-            </FrameLayout>
-
+            <TextView
+                android:id="@+id/badgeText"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:background="@drawable/unread_badge"
+                android:gravity="center"
+                android:textColor="#FFFFFF"
+                android:textSize="10sp" />
         </FrameLayout>
 
-        <TextView
-            android:id="@+id/appName"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="10sp"
-            android:textColor="#FFFFFF"
-            android:maxLines="1"
-            android:ellipsize="end"
-            android:gravity="center"
-            android:clickable="false"
-            android:focusable="false" />
+        <!-- Папка (сетка миниатюр 3x3) -->
+        <GridLayout
+            android:id="@+id/miniGridContainer"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:columnCount="3"
+            android:rowCount="3"
+            android:useDefaultMargins="false"
+            android:visibility="gone"
+            android:background="@drawable/folder_background">
 
-    </LinearLayout>
+            <FrameLayout
+                android:id="@+id/miniSlot1"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_columnWeight="1"
+                android:layout_rowWeight="1"
+                android:layout_margin="2dp">
+                <ImageView android:id="@+id/miniIcon1" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="centerCrop" android:visibility="gone" />
+            </FrameLayout>
+            <FrameLayout
+                android:id="@+id/miniSlot2"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_columnWeight="1"
+                android:layout_rowWeight="1"
+                android:layout_margin="2dp">
+                <ImageView android:id="@+id/miniIcon2" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="centerCrop" android:visibility="gone" />
+            </FrameLayout>
+            <FrameLayout
+                android:id="@+id/miniSlot3"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_columnWeight="1"
+                android:layout_rowWeight="1"
+                android:layout_margin="2dp">
+                <ImageView android:id="@+id/miniIcon3" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="centerCrop" android:visibility="gone" />
+            </FrameLayout>
+            <FrameLayout
+                android:id="@+id/miniSlot4"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_columnWeight="1"
+                android:layout_rowWeight="1"
+                android:layout_margin="2dp">
+                <ImageView android:id="@+id/miniIcon4" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="centerCrop" android:visibility="gone" />
+            </FrameLayout>
+            <FrameLayout
+                android:id="@+id/miniSlot5"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_columnWeight="1"
+                android:layout_rowWeight="1"
+                android:layout_margin="2dp">
+                <ImageView android:id="@+id/miniIcon5" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="centerCrop" android:visibility="gone" />
+            </FrameLayout>
+            <FrameLayout
+                android:id="@+id/miniSlot6"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_columnWeight="1"
+                android:layout_rowWeight="1"
+                android:layout_margin="2dp">
+                <ImageView android:id="@+id/miniIcon6" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="centerCrop" android:visibility="gone" />
+            </FrameLayout>
+            <FrameLayout
+                android:id="@+id/miniSlot7"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_columnWeight="1"
+                android:layout_rowWeight="1"
+                android:layout_margin="2dp">
+                <ImageView android:id="@+id/miniIcon7" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="centerCrop" android:visibility="gone" />
+            </FrameLayout>
+            <FrameLayout
+                android:id="@+id/miniSlot8"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_columnWeight="1"
+                android:layout_rowWeight="1"
+                android:layout_margin="2dp">
+                <ImageView android:id="@+id/miniIcon8" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="centerCrop" android:visibility="gone" />
+            </FrameLayout>
+            <FrameLayout
+                android:id="@+id/miniSlot9"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_columnWeight="1"
+                android:layout_rowWeight="1"
+                android:layout_margin="2dp">
+                <ImageView android:id="@+id/miniIcon9" android:layout_width="match_parent" android:layout_height="match_parent" android:scaleType="centerCrop" android:visibility="gone" />
+            </FrameLayout>
+        </GridLayout>
 
-</FrameLayout>
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/appName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="11sp"
+        android:textColor="#FFFFFF"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:gravity="center"
+        android:shadowColor="#80000000"
+        android:shadowRadius="3"
+        android:shadowDx="0"
+        android:shadowDy="1" />
+
+</LinearLayout>

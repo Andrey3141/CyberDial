@@ -2,24 +2,29 @@ package com.printer.cyberdial
 
 import android.app.AlertDialog
 import android.content.Intent
+import android.graphics.Color
+import android.graphics.ColorMatrix
+import android.graphics.ColorMatrixColorFilter
+import android.graphics.PorterDuff
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.AnimationUtils
 import android.widget.FrameLayout
 import android.widget.GridLayout
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
-import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.core.view.ViewCompat
+import androidx.core.view.HapticFeedbackConstantsCompat
+import android.animation.ObjectAnimator
+import android.animation.PropertyValuesHolder
 
 class AppIconAdapter(
     private var apps: List<AppModel>,
-    private val columns: Int = 4
+    private val columns: Int = 5
 ) : RecyclerView.Adapter<AppIconAdapter.ViewHolder>() {
-
     private var totalUnreadCount: Int = 0
 
     fun updateUnreadCount(count: Int) {
@@ -27,14 +32,31 @@ class AppIconAdapter(
         notifyDataSetChanged()
     }
 
+    private fun applyIconState(iconView: ImageView, overlay: View, lockIcon: ImageView, isActive: Boolean) {
+        if (!isActive) {
+            val matrix = ColorMatrix()
+            matrix.setSaturation(0f)
+            matrix.postConcat(ColorMatrix().apply { setScale(0.4f, 0.4f, 0.4f, 1f) })
+            iconView.colorFilter = ColorMatrixColorFilter(matrix)
+            iconView.alpha = 0.7f
+            overlay.visibility = View.VISIBLE
+            lockIcon.visibility = View.VISIBLE
+        } else {
+            iconView.colorFilter = null
+            iconView.alpha = 1f
+            overlay.visibility = View.GONE
+            lockIcon.visibility = View.GONE
+        }
+    }
+
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val appIconContainer: CardView = view.findViewById(R.id.appIconContainer)
-        val normalIconContainer: CardView = view.findViewById(R.id.normalIconContainer)
         val icon: ImageView = view.findViewById(R.id.appIcon)
         val name: TextView = view.findViewById(R.id.appName)
-        val miniGridContainer: GridLayout = view.findViewById(R.id.miniGridContainer)
+        val inactiveOverlay: View = view.findViewById(R.id.inactiveOverlay)
+        val lockIcon: ImageView = view.findViewById(R.id.lockIcon)
         val badgeContainer: FrameLayout = view.findViewById(R.id.badgeContainer)
         val badgeText: TextView = view.findViewById(R.id.badgeText)
+        val miniGridContainer: GridLayout = view.findViewById(R.id.miniGridContainer)
 
         val miniIcon1: ImageView = view.findViewById(R.id.miniIcon1)
         val miniIcon2: ImageView = view.findViewById(R.id.miniIcon2)
@@ -63,8 +85,9 @@ class AppIconAdapter(
         holder.name.text = app.name
 
         if (app.isFolder && app.folderApps != null) {
-            holder.normalIconContainer.visibility = View.GONE
-            holder.appIconContainer.visibility = View.INVISIBLE
+            holder.icon.visibility = View.GONE
+            holder.inactiveOverlay.visibility = View.GONE
+            holder.lockIcon.visibility = View.GONE
             holder.miniGridContainer.visibility = View.VISIBLE
             holder.badgeContainer.visibility = View.GONE
 
@@ -75,10 +98,12 @@ class AppIconAdapter(
                 val miniIcon = holder.miniIconsList[i]
                 if (i < count) {
                     miniIcon.visibility = View.VISIBLE
-                    try {
-                        miniIcon.setImageResource(folderApps[i].iconResId)
-                    } catch (e: Exception) {
-                        miniIcon.setImageResource(R.drawable.ic_telegram_color)
+                    miniIcon.setImageResource(folderApps[i].iconResId)
+                    // Не применяем белый фильтр к Telegram, иначе теряется голубой фон
+                    if (folderApps[i].iconResId != R.drawable.ic_telegram_color) {
+                        miniIcon.setColorFilter(Color.parseColor("#CCFFFFFF"), PorterDuff.Mode.SRC_IN)
+                    } else {
+                        miniIcon.colorFilter = null
                     }
                 } else {
                     miniIcon.visibility = View.INVISIBLE
@@ -89,10 +114,11 @@ class AppIconAdapter(
                 showFolderDialog(holder.itemView, app)
             }
         } else {
-            holder.normalIconContainer.visibility = View.VISIBLE
-            holder.appIconContainer.visibility = View.VISIBLE
+            holder.icon.visibility = View.VISIBLE
             holder.miniGridContainer.visibility = View.GONE
             holder.icon.setImageResource(app.iconResId)
+
+            applyIconState(holder.icon, holder.inactiveOverlay, holder.lockIcon, app.isActive)
 
             if (app.name == "Telegram" && totalUnreadCount > 0) {
                 holder.badgeContainer.visibility = View.VISIBLE
@@ -101,20 +127,26 @@ class AppIconAdapter(
                 holder.badgeContainer.visibility = View.GONE
             }
 
-            holder.itemView.setOnClickListener {
-                val scaleDown = AnimationUtils.loadAnimation(holder.itemView.context, android.R.anim.fade_in)
-                scaleDown.duration = 100
-                holder.itemView.startAnimation(scaleDown)
+            holder.itemView.setOnClickListener { view ->
+                val pressAnim = ObjectAnimator.ofPropertyValuesHolder(
+                    view,
+                    PropertyValuesHolder.ofFloat("scaleX", 0.92f),
+                    PropertyValuesHolder.ofFloat("scaleY", 0.92f)
+                )
+                pressAnim.duration = 80
+                pressAnim.start()
+
+                if (!app.isActive) {
+                    ViewCompat.performHapticFeedback(view, HapticFeedbackConstantsCompat.CONTEXT_CLICK)
+                    Toast.makeText(view.context, "🔒 Приложение заблокировано", Toast.LENGTH_SHORT).show()
+                    return@setOnClickListener
+                }
 
                 if (app.name == "Telegram") {
-                    val intent = Intent(holder.itemView.context, TelegramSplashActivity::class.java)
-                    holder.itemView.context.startActivity(intent)
+                    val intent = Intent(view.context, TelegramSplashActivity::class.java)
+                    view.context.startActivity(intent)
                 } else {
-                    Toast.makeText(
-                        holder.itemView.context,
-                        "Открытие ${app.name}",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    Toast.makeText(view.context, "📱 Открытие ${app.name}", Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -125,9 +157,8 @@ class AppIconAdapter(
             .inflate(R.layout.dialog_folder, null)
         val recyclerView = dialogView.findViewById<RecyclerView>(R.id.folderAppsRecyclerView)
 
-        val columnCount = 3
-        recyclerView.layoutManager = GridLayoutManager(view.context, columnCount)
-        recyclerView.adapter = AppIconAdapter(folder.folderApps ?: emptyList(), columnCount)
+        recyclerView.layoutManager = GridLayoutManager(view.context, 3)
+        recyclerView.adapter = AppIconAdapter(folder.folderApps ?: emptyList(), 3)
 
         AlertDialog.Builder(view.context)
             .setTitle(folder.name)

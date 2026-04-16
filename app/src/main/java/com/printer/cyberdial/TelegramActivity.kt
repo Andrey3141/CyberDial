@@ -34,12 +34,11 @@ class TelegramActivity : AppCompatActivity() {
     private val handler = Handler(Looper.getMainLooper())
     private lateinit var timeRunnable: Runnable
     private lateinit var updateRunnable: Runnable
-    private lateinit var timerRunnable: Runnable
     private lateinit var batteryRunnable: Runnable
     private lateinit var messageRepository: MessageRepository
     private lateinit var chatAdapter: ChatAdapter
     private var chatsWithLastMessage = mutableListOf<ChatWithLastMessage>()
-    private var timerStarted = false
+    private lateinit var mamulyaTimerManager: MamulyaTimerManager
 
     private val lastReadMap = mutableMapOf<String, Int>()
 
@@ -47,6 +46,9 @@ class TelegramActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_telegram)
         messageRepository = MessageRepository(this)
+
+        // Используем глобальный менеджер таймера
+        mamulyaTimerManager = MamulyaTimerManager.getInstance(this)
 
         loadLastRead()
 
@@ -60,7 +62,7 @@ class TelegramActivity : AppCompatActivity() {
         setupClock()
         setupChatList()
         startChatUpdater()
-        startRoleTimer()
+        startRoleOnTimerFinish()
         startBatteryUpdater()
     }
 
@@ -101,41 +103,64 @@ class TelegramActivity : AppCompatActivity() {
         batteryIcon.setImageResource(iconRes)
     }
 
-    private fun startRoleTimer() {
-        timerRunnable = Runnable {
-            if (!timerStarted) {
-                timerStarted = true
+    private fun startRoleOnTimerFinish() {
+        // Подписываемся на завершение глобального таймера
+        mamulyaTimerManager.setOnTimerFinishListener {
+            runOnUiThread {
+                if (!messageRepository.isMamulyaFirstMessageSent()) {
+                    val random = Random()
+                    val isMom = random.nextBoolean()
+                    val role = if (isMom) "mom" else "scammer"
 
-                if (messageRepository.isMamulyaFirstMessageSent()) {
-                    return@Runnable
+                    messageRepository.saveMamulyaRole(role)
+
+                    val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+                    val currentTime = timeFormat.format(Date())
+
+                    val firstMessageText = if (role == "mom") {
+                        "Привет, родная. Как спалось?"
+                    } else {
+                        "Привет, родная. Как дела?"
+                    }
+
+                    val existingMessages = messageRepository.loadMessages("Мамуля 💖").toMutableList()
+                    val firstBotMessage = ChatActivity.MessageModel(firstMessageText, false, currentTime, false, false)
+                    existingMessages.add(firstBotMessage)
+                    messageRepository.saveMessages("Мамуля 💖", existingMessages)
+                    messageRepository.saveLastMessage("Мамуля 💖", firstMessageText, currentTime, "none")
+                    messageRepository.saveMamulyaFirstMessageSent(true)
+
+                    updateChats()
                 }
-
-                val random = Random()
-                val isMom = random.nextBoolean()
-                val role = if (isMom) "mom" else "scammer"
-
-                messageRepository.saveMamulyaRole(role)
-
-                val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
-                val currentTime = timeFormat.format(Date())
-
-                val firstMessageText = if (role == "mom") {
-                    "Привет, родная. Как спалось?"
-                } else {
-                    "Привет, родная. Как дела?"
-                }
-
-                val existingMessages = messageRepository.loadMessages("Мамуля 💖").toMutableList()
-                val firstBotMessage = ChatActivity.MessageModel(firstMessageText, false, currentTime, false, false)
-                existingMessages.add(firstBotMessage)
-                messageRepository.saveMessages("Мамуля 💖", existingMessages)
-                messageRepository.saveLastMessage("Мамуля 💖", firstMessageText, currentTime, "none")
-                messageRepository.saveMamulyaFirstMessageSent(true)
-
-                updateChats()
             }
         }
-        handler.postDelayed(timerRunnable, 60000)
+
+        // Если таймер уже завершен, сразу отправляем сообщение
+        if (mamulyaTimerManager.isTimerFinished() && !messageRepository.isMamulyaFirstMessageSent()) {
+            val random = Random()
+            val isMom = random.nextBoolean()
+            val role = if (isMom) "mom" else "scammer"
+
+            messageRepository.saveMamulyaRole(role)
+
+            val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+            val currentTime = timeFormat.format(Date())
+
+            val firstMessageText = if (role == "mom") {
+                "Привет, родная. Как спалось?"
+            } else {
+                "Привет, родная. Как дела?"
+            }
+
+            val existingMessages = messageRepository.loadMessages("Мамуля 💖").toMutableList()
+            val firstBotMessage = ChatActivity.MessageModel(firstMessageText, false, currentTime, false, false)
+            existingMessages.add(firstBotMessage)
+            messageRepository.saveMessages("Мамуля 💖", existingMessages)
+            messageRepository.saveLastMessage("Мамуля 💖", firstMessageText, currentTime, "none")
+            messageRepository.saveMamulyaFirstMessageSent(true)
+
+            updateChats()
+        }
     }
 
     private fun loadLastRead() {
@@ -264,8 +289,8 @@ class TelegramActivity : AppCompatActivity() {
         super.onDestroy()
         handler.removeCallbacks(timeRunnable)
         handler.removeCallbacks(updateRunnable)
-        handler.removeCallbacks(timerRunnable)
         handler.removeCallbacks(batteryRunnable)
+        // Не отписываемся от таймера, т.к. он глобальный
     }
 
     private fun setupChatList() {
