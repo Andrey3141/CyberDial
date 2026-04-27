@@ -8,7 +8,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class MessageRepository(context: Context) {
+class MessageRepository(private val context: Context) {
 
     private val prefs: SharedPreferences = context.getSharedPreferences("telegram_messages", Context.MODE_PRIVATE)
     private val rolePrefs: SharedPreferences = context.getSharedPreferences("mamulya_role", Context.MODE_PRIVATE)
@@ -99,8 +99,11 @@ class MessageRepository(context: Context) {
         if (chatName == "Мамуля 💖") {
             return getMamulyaHistory()
         }
+        if (chatName == "Михаил") {
+            return getMikhailHistory()
+        }
 
-        val privateChats = listOf("Анна", "Михаил", "Папа", "Друг")
+        val privateChats = listOf("Анна", "Папа", "Друг")
         return if (privateChats.contains(chatName)) {
             listOf(
                 ChatActivity.MessageModel("Привет! Я бот. Выбери вариант ответа:", false, currentTime, false, false)
@@ -164,5 +167,48 @@ class MessageRepository(context: Context) {
         messages.add(ChatActivity.MessageModel("Шучу. Надевай свою дырявую тряпку. Люблю. 💖", false, "08:55", false, true))
 
         return messages
+    }
+
+    private fun getMikhailHistory(): List<ChatActivity.MessageModel> {
+        val messages = mutableListOf<ChatActivity.MessageModel>()
+
+        messages.add(ChatActivity.MessageModel("Ты опять кружку в раковине оставила 🙂", false, "22:14", false, true))
+        messages.add(ChatActivity.MessageModel("Я её замочу, честно", true, "22:15", true, true))
+        messages.add(ChatActivity.MessageModel("Ты всегда так говоришь", false, "22:16", false, true))
+        messages.add(ChatActivity.MessageModel("И всегда забываю 😅", true, "22:17", true, true))
+
+        messages.add(ChatActivity.MessageModel("Я в магазин заехал", false, "18:05", false, true))
+        messages.add(ChatActivity.MessageModel("Тебе что взять?", false, "18:05", false, true))
+        messages.add(ChatActivity.MessageModel("Йогурт и что-нибудь сладкое", true, "18:07", true, true))
+        messages.add(ChatActivity.MessageModel("Ты всегда говоришь “что-нибудь сладкое”", false, "18:08", false, true))
+        messages.add(ChatActivity.MessageModel("И никогда не уточняешь 😄", false, "18:08", false, true))
+
+        messages.add(ChatActivity.MessageModel("Ты где?", false, "21:40", false, true))
+        messages.add(ChatActivity.MessageModel("С подругой", true, "21:45", true, true))
+        messages.add(ChatActivity.MessageModel("Поздно уже", false, "21:46", false, true))
+        messages.add(ChatActivity.MessageModel("Я не маленькая", true, "21:47", true, true))
+        messages.add(ChatActivity.MessageModel("Я знаю", false, "21:48", false, true))
+        messages.add(ChatActivity.MessageModel("Но всё равно переживаю", false, "21:48", false, true))
+
+        messages.add(ChatActivity.MessageModel("Ты опять уснула без одеяла", false, "00:12", false, true))
+        messages.add(ChatActivity.MessageModel("Я тебя укрыл", false, "00:12", false, true))
+        messages.add(ChatActivity.MessageModel("Спасибо 🥺", true, "08:20", true, true))
+
+        messages.add(ChatActivity.MessageModel("Ты переехала ко мне и теперь я не могу найти свои вещи", false, "12:10", false, true))
+        messages.add(ChatActivity.MessageModel("Потому что у тебя их нет", true, "12:11", true, true))
+        messages.add(ChatActivity.MessageModel("Очень смешно", false, "12:12", false, true))
+        messages.add(ChatActivity.MessageModel("Но мне нравится, если честно", false, "12:12", false, true))
+
+        return messages
+    }
+
+    fun getScammerIdentity(): String? {
+        val prefs = context.getSharedPreferences("scenario", Context.MODE_PRIVATE)
+        return prefs.getString("scammer_identity", null)
+    }
+
+    fun saveScammerIdentity(identity: String) {
+        val prefs = context.getSharedPreferences("scenario", Context.MODE_PRIVATE)
+        prefs.edit().putString("scammer_identity", identity).apply()
     }
 }

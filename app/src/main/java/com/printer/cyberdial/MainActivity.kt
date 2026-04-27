@@ -19,6 +19,7 @@ import androidx.viewpager2.widget.ViewPager2
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.util.Random
 
 class MainActivity : AppCompatActivity() {
 
@@ -38,7 +39,7 @@ class MainActivity : AppCompatActivity() {
     // Состояния активности для дока
     private val dockItemsState = mapOf(
         R.id.dockPhone to false,      // Телефон неактивен
-        R.id.dockMessages to true,    // Сообщения (Telegram) активен
+        R.id.dockMessages to false,    // Сообщения активен
         R.id.dockBrowser to false,    // Браузер неактивен
         R.id.dockCamera to false      // Камера неактивна
     )
@@ -60,6 +61,14 @@ class MainActivity : AppCompatActivity() {
 
         // Слушаем завершение таймера
         mamulyaTimerManager.setOnTimerFinishListener {
+
+            val scammer = messageRepository.getScammerIdentity()
+
+            if (scammer == null) {
+                val randomScammer = if (Random().nextBoolean()) "mom" else "mikhail"
+                messageRepository.saveScammerIdentity(randomScammer)
+            }
+
             // Таймер завершен - показываем уведомление
             runOnUiThread {
                 Toast.makeText(this, "🔔 Мамуля сейчас напишет! Открой Telegram", Toast.LENGTH_LONG).show()

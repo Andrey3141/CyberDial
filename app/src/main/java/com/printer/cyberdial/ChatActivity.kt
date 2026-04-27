@@ -53,55 +53,8 @@ class ChatActivity : AppCompatActivity() {
     private var mamulyaDialogCompleted = false
     private var lastMessageCount = 0
 
-    private val momBotMessages = listOf(
-        "Привет, родная. Как спалось?",
-        "😂 Кстати о выкупе. Ты не забыла, что у тёти Веры юбилей в субботу? Я записала нас с тобой на 15:00.",
-        "Во-первых, печень полезно. Во-вторых, йога никуда не денется. В-третьих, я купила тебе платье.",
-        "Нет. Вишнёвое. Очень идёт к твоим тёмным кругам под глазами, между прочим.",
-        "Я любя. Приедешь ко мне завтра вечером? Платье померить. И кот по тебе скучает. Он твою комнату обнюхивает и грустит.",
-        "Это тоже любовь. Приезжай в 18:00. Я суп с фрикадельками сварю.",
-        "Они всегда для тебя маленькие. Даже когда тебе будет 50.\nотправила стикер: котёнок обнимает сердечко",
-        "Это что за зверь? Почему не кот?",
-        "Ага. Колючую, но голодную. Фрикадельки в 18:00. Не опаздывай.",
-        "И я тебя. Целую в макушку. Хотя ты всё равно выше меня стала."
-    )
-
-    private val momUserResponses = listOf(
-        "Привет. Нормально. Твой таракан мне снился. Он требовал выкуп хлебными крошками.",
-        "Мам, я в субботу на йогу записалась. И вообще, тётя Вера каждый год говорит, что я «исхудала до ужаса» и кормит меня котлетами из печени.",
-        "Опять бежевое?",
-        "Спасибо, мам. За комплимент отдельное спасибо.",
-        "Кот грустит по моей кровати, потому что ты не пускаешь его на свою.",
-        "Договорились. Только фрикадельки пусть будут маленькие, как в детстве.",
-        "отправила стикер: ёж в тапках",
-        "Это ёж. Он символизирует мою колючую натуру.",
-        "Не буду. Люблю тебя."
-    )
-
-    private val scammerBotMessages = listOf(
-        "Привет, родная. Как дела?",
-        "Ох уж этот таракан 😊 Ты не представляешь, я сегодня вспоминала, как ты маленькая боялась пауков. Забавно.",
-        "Взрослая совсем. Слушай, дочень, я тут по делам бегала весь день. Устала как собака. И сейчас в магазине дурацкая ситуация — карта не проходит. Технический сбой в банке, говорят. А мне нужно купить тёте Вере подарок на юбилей, я уже выбрала.",
-        "Да немного, около 15 тысяч. Я завтра же верну, как только банк починят. Ты же знаешь, я не люблю просить.",
-        "Да, ту самую, на которую ты мне стикеры с котёнком кидала. Только, дочень, можно с пометкой «на подарок»? Просто для отчётности, сама знаешь, как банки любят блокировать.",
-        "Ты моя умничка. Кстати, как тот бежевый свитер? Надела хоть раз?",
-        "Ну и ладно. Твоё право. Главное, что ты есть у меня. Перевела?",
-        "Секунду. Проверяю. Да, всё пришло, спасибо, солнышко. Ты меня спасла. Тётя Вера будет в восторге.",
-        "Сюрприз. 😊 Ладно, беги, работай. Я завтра тебе фрикадельки сварю, приезжай вечером.",
-        "И я тебя. Целую в макушку."
-    )
-
-    private val scammerUserResponses = listOf(
-        "Привет. Нормально. Твой таракан мне снился.",
-        "Ага. А теперь я сама пауков на балконе выношу.",
-        "Ой, мам, давай я тебе переведу? Сколько надо?",
-        "Конечно, мам. На карту какую? Ту, что у меня есть?",
-        "Хорошо. Сейчас переведу.",
-        "Мам, я его ни разу не надела. И не надену.",
-        "Да, только что. Пришло?",
-        "А что за подарок?",
-        "Договорились. Люблю тебя."
-    )
+    private var mikhailStep = 0
+    private var mikhailRole: String = "normal"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -118,9 +71,14 @@ class ChatActivity : AppCompatActivity() {
         isPrivate = intent.getBooleanExtra("is_private", true)
         messageRepository = MessageRepository(this)
 
+        val scammer = messageRepository.getScammerIdentity()
+
         if (chatTitle == "Мамуля 💖") {
-            mamulyaRole = messageRepository.getMamulyaRole()
-            mamulyaDialogCompleted = messageRepository.isMamulyaDialogCompleted()
+            mamulyaRole = if (scammer == "mom") "scammer" else "mom"
+        }
+
+        if (chatTitle == "Михаил") {
+            mikhailRole = if (scammer == "mikhail") "scammer" else "normal"
         }
 
         setupViews()
@@ -196,11 +154,10 @@ class ChatActivity : AppCompatActivity() {
             recyclerView.scrollToPosition(messages.size - 1)
             lastMessageCount = messages.size
 
-            val firstBotMessageText = if (mamulyaRole == "mom") momBotMessages[0] else scammerBotMessages[0]
-            val hasFirstBotMessage = messages.any { it.text == firstBotMessageText && !it.isOutgoing }
+            val firstBotMessageText = if (mamulyaRole == "mom") MomScenario.momBotMessages[0] else MomScenario.scammerBotMessages[0]
 
-            if (hasFirstBotMessage) {
-                val userResponses = if (mamulyaRole == "mom") momUserResponses else scammerUserResponses
+            run {
+                val userResponses = if (mamulyaRole == "mom") MomScenario.momUserResponses else MomScenario.scammerUserResponses
                 val userResponseCount = messages.count { it.isOutgoing && it.text in userResponses }
                 mamulyaDialogStep = userResponseCount
 
@@ -311,11 +268,10 @@ class ChatActivity : AppCompatActivity() {
         recyclerView.scrollToPosition(messages.size - 1)
 
         if (chatTitle == "Мамуля 💖" && mamulyaRole != null && !mamulyaDialogCompleted) {
-            val firstBotMessageText = if (mamulyaRole == "mom") momBotMessages[0] else scammerBotMessages[0]
-            val hasFirstBotMessage = messages.any { it.text == firstBotMessageText && !it.isOutgoing }
+            val firstBotMessageText = if (mamulyaRole == "mom") MomScenario.momBotMessages[0] else MomScenario.scammerBotMessages[0]
 
-            if (hasFirstBotMessage) {
-                val userResponses = if (mamulyaRole == "mom") momUserResponses else scammerUserResponses
+            run {
+                val userResponses = if (mamulyaRole == "mom") MomScenario.momUserResponses else MomScenario.scammerUserResponses
                 val userResponseCount = messages.count { it.isOutgoing && it.text in userResponses }
                 mamulyaDialogStep = userResponseCount
 
@@ -327,6 +283,21 @@ class ChatActivity : AppCompatActivity() {
                     showMamulyaOptions()
                 }
             }
+            return
+        }
+        if (chatTitle == "Михаил") {
+
+            if (messages.isEmpty()) {
+                optionsContainer.visibility = View.GONE
+                return
+            }
+
+            if (!messages.last().isOutgoing) {
+                showMikhailOptions()
+            } else {
+                optionsContainer.visibility = View.GONE
+            }
+
             return
         }
 
@@ -352,17 +323,13 @@ class ChatActivity : AppCompatActivity() {
         val isMom = mamulyaRole == "mom"
 
         val optionsText = if (isMom) {
-            if (currentStep < momUserResponses.size) {
-                listOf(momUserResponses[currentStep])
-            } else {
-                emptyList()
-            }
+            if (currentStep < MomScenario.momUserResponses.size) {
+                listOf(MomScenario.momUserResponses[currentStep])
+            } else emptyList()
         } else {
-            if (currentStep < scammerUserResponses.size) {
-                listOf(scammerUserResponses[currentStep])
-            } else {
-                emptyList()
-            }
+            if (currentStep < MomScenario.scammerUserResponses.size) {
+                listOf(MomScenario.scammerUserResponses[currentStep])
+            } else emptyList()
         }
 
         if (optionsText.isEmpty()) {
@@ -435,14 +402,14 @@ class ChatActivity : AppCompatActivity() {
         val nextBotIndex = currentStep + 1
 
         val botText = if (isMom) {
-            if (nextBotIndex < momBotMessages.size) {
-                momBotMessages[nextBotIndex]
+            if (nextBotIndex < MomScenario.momBotMessages.size) {
+                MomScenario.momBotMessages[nextBotIndex]
             } else {
                 null
             }
         } else {
-            if (nextBotIndex < scammerBotMessages.size) {
-                scammerBotMessages[nextBotIndex]
+            if (nextBotIndex < MomScenario.scammerBotMessages.size) {
+                MomScenario.scammerBotMessages[nextBotIndex]
             } else {
                 null
             }
@@ -467,13 +434,15 @@ class ChatActivity : AppCompatActivity() {
             saveMessages()
             updateTotalUnreadCount()
 
+            scheduleMikhailMessage()
+
             mamulyaDialogStep++
 
             val nextStep = mamulyaDialogStep
             val hasMoreOptions = if (isMom) {
-                nextStep < momUserResponses.size
+                nextStep < MomScenario.momUserResponses.size
             } else {
-                nextStep < scammerUserResponses.size
+                nextStep < MomScenario.scammerUserResponses.size
             }
 
             if (hasMoreOptions) {
@@ -840,5 +809,151 @@ class ChatActivity : AppCompatActivity() {
         }
 
         override fun getItemCount(): Int = messages.size
+    }
+
+    private fun initMikhail() {
+        showMikhailOptions()
+    }
+
+    private fun showMikhailOptions() {
+        optionsContainer.removeAllViews()
+
+        val userMessages = getMikhailUserMessages()
+
+        if (mikhailStep >= userMessages.size) {
+            optionsContainer.visibility = View.GONE
+            return
+        }
+
+        optionsContainer.visibility = View.VISIBLE
+
+        val options = listOf(userMessages[mikhailStep])
+
+        for (text in options) {
+            val button = MaterialButton(this)
+            button.text = text
+            button.setOnClickListener {
+                sendMikhailMessage(text)
+            }
+            optionsContainer.addView(button)
+        }
+    }
+
+    private fun sendMikhailMessage(text: String) {
+        val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+        val currentTime = timeFormat.format(Date())
+
+        val msg = MessageModel(text, true, currentTime, false, false)
+        messages.add(msg)
+        val position = messages.size - 1
+
+        messageAdapter.notifyItemInserted(position)
+        recyclerView.scrollToPosition(position)
+        saveMessages()
+
+        optionsContainer.visibility = View.GONE
+
+        simulateMikhailMessageStatus(position)
+    }
+
+    private fun simulateMikhailMessageStatus(position: Int) {
+        handler.postDelayed({
+            if (position < messages.size && messages[position].isOutgoing && !messages[position].isDelivered) {
+                messages[position] = messages[position].copy(isDelivered = true)
+                messageAdapter.notifyItemChanged(position)
+                saveMessages()
+
+                handler.postDelayed({
+                    if (position < messages.size && messages[position].isOutgoing && !messages[position].isRead) {
+                        messages[position] = messages[position].copy(isRead = true)
+                        messageAdapter.notifyItemChanged(position)
+                        saveMessages()
+
+                        sendMikhailReply()
+                    }
+                }, (2000 + random.nextInt(4000)).toLong())
+            }
+        }, (1000 + random.nextInt(3000)).toLong())
+    }
+
+    private fun sendMikhailReply() {
+        val botMessages = getMikhailBotMessages()
+
+        if (mikhailStep >= botMessages.size) return
+
+        handler.postDelayed({
+            val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+            val currentTime = timeFormat.format(Date())
+
+            val reply = botMessages[mikhailStep]
+
+            val botMsg = MessageModel(reply, false, currentTime)
+            messages.add(botMsg)
+
+            messageAdapter.notifyItemInserted(messages.size - 1)
+            recyclerView.scrollToPosition(messages.size - 1)
+
+            mikhailStep++
+            saveMessages()
+            updateTotalUnreadCount()
+
+            showMikhailOptions()
+
+        }, (1500 + random.nextInt(4000)).toLong())
+    }
+
+    private fun scheduleMikhailMessage() {
+        handler.postDelayed({
+            if (chatTitle == "Михаил") return@postDelayed
+
+            val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+            val currentTime = timeFormat.format(Date())
+
+            val botMessages = getMikhailMessages()
+
+            val mikhailMessages = messageRepository
+                .loadMessages("Михаил")
+                .toMutableList()
+
+            val botCount = mikhailMessages.count { !it.isOutgoing }
+
+            if (botCount >= botMessages.size) return@postDelayed
+
+            val text = botMessages[botCount]
+
+            val msg = MessageModel(text, false, currentTime)
+
+            mikhailMessages.add(msg)
+
+            messageRepository.saveMessages("Михаил", mikhailMessages)
+            messageRepository.saveLastMessage("Михаил", msg.text, msg.time, "none")
+
+            updateTotalUnreadCount()
+
+        }, 120000)
+    }
+
+    private fun getMikhailMessages(): List<String> {
+        return if (mikhailRole == "scammer") {
+            MikhailScenario.mikhailScamMessages
+        } else {
+            MikhailScenario.mikhailNormalMessages
+        }
+    }
+
+    private fun getMikhailBotMessages(): List<String> {
+        return if (mikhailRole == "scammer") {
+            MikhailScenario.mikhailScamMessages
+        } else {
+            MikhailScenario.mikhailNormalMessages
+        }
+    }
+
+    private fun getMikhailUserMessages(): List<String> {
+        return if (mikhailRole == "scammer") {
+            MikhailScenario.mikhailScamUserResponses
+        } else {
+            MikhailScenario.mikhailUserResponses
+        }
     }
 }

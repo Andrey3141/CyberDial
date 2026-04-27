@@ -39,6 +39,7 @@ class AppIconAdapter(
             matrix.postConcat(ColorMatrix().apply { setScale(0.4f, 0.4f, 0.4f, 1f) })
             iconView.colorFilter = ColorMatrixColorFilter(matrix)
             iconView.alpha = 0.7f
+            overlay.setBackgroundColor(0x66000000) // полупрозрачный чёрный (~40%)
             overlay.visibility = View.VISIBLE
             lockIcon.visibility = View.VISIBLE
         } else {
@@ -142,11 +143,15 @@ class AppIconAdapter(
                     return@setOnClickListener
                 }
 
-                if (app.name == "Telegram") {
-                    val intent = Intent(view.context, TelegramSplashActivity::class.java)
-                    view.context.startActivity(intent)
-                } else {
-                    Toast.makeText(view.context, "📱 Открытие ${app.name}", Toast.LENGTH_SHORT).show()
+                when (app.name) {
+                    "Telegram" -> {
+                        val intent = Intent(view.context, TelegramSplashActivity::class.java)
+                        view.context.startActivity(intent)
+                    }
+
+                    else -> {
+                        Toast.makeText(view.context, "📱 Открытие ${app.name}", Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
         }

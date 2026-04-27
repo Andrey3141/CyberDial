@@ -27,6 +27,8 @@ CyberDial/
 │           │               ├── MainActivity.kt
 │           │               ├── MamulyaTimerManager.kt
 │           │               ├── MessageRepository.kt
+│           │               ├── MikhailScenario.kt
+│           │               ├── MomScenario.kt
 │           │               ├── TelegramActivity.kt
 │           │               ├── TelegramSplashActivity.kt
 │           │               ├── UpdateChecker.kt
@@ -53,6 +55,7 @@ CyberDial/
 │               │   ├── ic_instagram.xml
 │               │   ├── ic_launcher_background.xml
 │               │   ├── ic_launcher_foreground.xml
+│               │   ├── ic_lock.xml
 │               │   ├── ic_message.xml
 │               │   ├── ic_phone.xml
 │               │   ├── ic_send.xml
@@ -69,7 +72,6 @@ CyberDial/
 │               │   ├── stat_sys_battery_charging.xml
 │               │   ├── stat_sys_signal.xml
 │               │   ├── unread_badge.xml
-│               │   ├── values-v31/
 │               │   └── widget_glass_bg.xml
 │               ├── layout/
 │               │   ├── activity_chat.xml

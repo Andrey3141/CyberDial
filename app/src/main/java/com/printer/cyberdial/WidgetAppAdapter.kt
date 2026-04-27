@@ -51,6 +51,7 @@ class WidgetAppAdapter(
             matrix.postConcat(ColorMatrix().apply { setScale(0.5f, 0.5f, 0.5f, 1f) })
             iconView.colorFilter = ColorMatrixColorFilter(matrix)
             iconView.alpha = 0.6f
+            overlay.setBackgroundColor(0x66000000) // полупрозрачный чёрный (~40%)
             overlay.visibility = View.VISIBLE
             lockIcon.visibility = View.VISIBLE
         } else {
